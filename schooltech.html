@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>SchoolTech Learn | วิทยาลัยอาชีวศึกษาจุลมณีอุทุมพรพิสัย</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<style>
+body{margin:0;font-family:Tahoma;background:#f4f6f8}
+
+/* ===== LOGIN ===== */
+.container{display:flex;height:100vh}
+.left{
+  width:45%;background:#1e88e5;color:white;
+  padding:40px;display:flex;flex-direction:column;justify-content:center
+}
+.right{
+  width:55%;background:white;
+  display:flex;justify-content:center;align-items:center
+}
+.box{width:360px}
+input,button{
+  width:100%;padding:10px;margin:6px 0;font-size:14px
+}
+button{background:#1e88e5;color:white;border:none;cursor:pointer}
+button:hover{opacity:0.9}
+a{color:#1e88e5;cursor:pointer}
+.hidden{display:none}
+.error{color:red;font-size:14px}
+
+/* ===== MENU ===== */
+nav{
+  background:#6a1b9a;
+  color:white;
+  display:flex;
+  padding:0 30px;
+  align-items:center
+}
+nav .logo{font-size:20px;font-weight:bold;margin-right:30px}
+nav ul{list-style:none;display:flex;margin:0;padding:0}
+nav ul li{position:relative}
+nav ul li a{
+  display:block;padding:18px 20px;color:white;text-decoration:none
+}
+nav ul li:hover{background:#7b1fa2}
+.dropdown{
+  display:none;position:absolute;top:55px;left:0;
+  background:#333;width:300px;z-index:999
+}
+.dropdown a{
+  display:block;padding:12px;border-bottom:1px solid #444
+}
+.dropdown a:hover{background:#555}
+nav ul li:hover .dropdown{display:block}
+
+/* ===== DASHBOARD ===== */
+#dashboard{display:none}
+.content{padding:30px}
+.card{
+  background:white;padding:25px;border-radius:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);margin-bottom:20px
+}
+</style>
+</head>
+
+<body>
+
+<!-- ===== LOGIN PAGE ===== -->
+<div class="container" id="loginPage">
+
+<div class="left">
+  <h1>งานเทคโนโลยีสารสนเทศ</h1>
+  <h2>วิทยาลัยอาชีวศึกษาจุลมณีอุทุมพรพิสัย</h2>
+  <p>โทรศัพท์: 045-965202</p>
+  <hr>
+  <p>📢 ข่าวสารวิทยาลัย</p>
+  <a href="https://chullamanee.ac.th/web/" target="_blank" style="color:white">
+    เข้าเว็บไซต์วิทยาลัย
+  </a>
+</div>
+
+<div class="right">
+<div class="box">
+
+<!-- LOGIN -->
+<div id="loginBox">
+<h2>เข้าสู่ระบบ</h2>
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+<p id="errorMsg" class="error"></p>
+<button onclick="login()">เข้าสู่ระบบ</button>
+<p>ยังไม่มีบัญชี? <a onclick="showRegister()">สมัครสมาชิก</a></p>
+</div>
+
+<!-- REGISTER -->
+<div id="registerBox" class="hidden">
+<h2>สมัครสมาชิก</h2>
+<input id="rEmail" placeholder="Email">
+<input id="citizen" placeholder="เลขบัตรประชาชน">
+<input id="studentId" placeholder="รหัสนักศึกษา">
+<input id="rPassword" type="password" placeholder="รหัสผ่าน">
+<input id="rPassword2" type="password" placeholder="ยืนยันรหัสผ่าน">
+<button onclick="register()">สมัครสมาชิก</button>
+<a onclick="showLogin()">ย้อนกลับ</a>
+</div>
+
+</div>
+</div>
+</div>
+
+<!-- ===== DASHBOARD ===== -->
+<div id="dashboard">
+
+<nav>
+  <div class="logo">SchoolTech Learn</div>
+  <ul>
+    <li>
+      <a href="#">แผนกวิชา</a>
+      <div class="dropdown">
+        <a href="#">เทคโนโลยีสารสนเทศ</a>
+        <a href="#">คอมพิวเตอร์ธุรกิจ</a>
+        <a href="#">การบัญชี</a>
+        <a href="#">การตลาด</a>
+        <a href="#">ไฟฟ้ากำลัง</a>
+        <a href="#">อิเล็กทรอนิกส์</a>
+        <a href="#">ช่างยนต์</a>
+        <a href="#">ช่างกลโรงงาน</a>
+      </div>
+    </li>
+
+    <li>
+      <a href="#">นักศึกษา</a>
+      <div class="dropdown">
+        <a href="#">ข้อมูลส่วนตัว</a>
+        <a href="#">เช็คเกรด</a>
+        <a href="#">ประวัติการเข้าเรียน</a>
+      </div>
+    </li>
+
+    <li>
+      <a href="#">ข่าวสาร</a>
+      <div class="dropdown">
+        <a href="https://chullamanee.ac.th/web/" target="_blank">ข่าววิทยาลัย</a>
+      </div>
+    </li>
+
+    <li><a onclick="logout()">ออกจากระบบ</a></li>
+  </ul>
+</nav>
+
+<div class="content">
+  <div class="card">
+    <h2 id="nameShow"></h2>
+    <p>รหัสนักศึกษา: <span id="sidShow"></span></p>
+    <p>คะแนน: <span id="scoreShow"></span></p>
+    <p>เกรด: <span id="gradeShow"></span></p>
+    <button onclick="checkIn()">เข้าเรียน</button>
+    <button onclick="checkOut()">ออกวิทยาลัย</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+// 🔥 Firebase Config (ใส่ของคุณ)
+firebase.initializeApp({
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID"
+});
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// UI
+function showRegister(){
+  loginBox.classList.add("hidden");
+  registerBox.classList.remove("hidden");
+}
+function showLogin(){
+  registerBox.classList.add("hidden");
+  loginBox.classList.remove("hidden");
+}
+
+// LOGIN (แก้ Error แล้ว)
+function login(){
+  document.getElementById("errorMsg").innerText = "";
+  auth.signInWithEmailAndPassword(email.value,password.value)
+  .then(loadDashboard)
+  .catch(()=>{
+    document.getElementById("errorMsg").innerText =
+      "กรุณาตรวจสอบรหัสของท่านให้ถูกต้อง";
+  });
+}
+
+// REGISTER
+function register(){
+  if(rPassword.value !== rPassword2.value)
+    return alert("รหัสผ่านไม่ตรงกัน");
+
+  auth.createUserWithEmailAndPassword(rEmail.value,rPassword.value)
+  .then(cred=>{
+    return db.collection("students").doc(cred.user.uid).set({
+      fullName:"นักศึกษาใหม่",
+      studentId:studentId.value,
+      score:80,
+      grade:"B"
+    })
+  }).then(()=>{
+    alert("สมัครสำเร็จ");
+    showLogin();
+  }).catch(()=>alert("ไม่สามารถสมัครสมาชิกได้"));
+}
+
+// DASHBOARD
+function loadDashboard(){
+  document.getElementById("loginPage").style.display="none";
+  document.getElementById("dashboard").style.display="block";
+
+  const uid = auth.currentUser.uid;
+  db.collection("students").doc(uid).get().then(doc=>{
+    const d = doc.data();
+    nameShow.innerText = d.fullName;
+    sidShow.innerText = d.studentId;
+    scoreShow.innerText = d.score;
+    gradeShow.innerText = d.grade;
+  });
+}
+
+// CHECK IN/OUT
+function checkIn(){
+  db.collection("students").doc(auth.currentUser.uid)
+  .update({checkIn:new Date()});
+  alert("บันทึกเวลาเข้าเรียนแล้ว");
+}
+function checkOut(){
+  db.collection("students").doc(auth.currentUser.uid)
+  .update({checkOut:new Date()});
+  alert("บันทึกเวลาออกวิทยาลัยแล้ว");
+}
+
+function logout(){
+  auth.signOut();
+  location.reload();
+}
+</script>
+
+</body>
+</html>
